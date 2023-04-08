@@ -37,3 +37,7 @@
 3. Improving the audio API.
 4. Improving scoring of the game in such a way that if a player plays on special squares the game should be able to calculate double or tripple letter or word scores.
 5. Improve the dictionary to show the meaning of the word played.
+
+![Game Menu](./client/images/gameMenu.png)
+
+![GamePlay](./client/images/game.png)
