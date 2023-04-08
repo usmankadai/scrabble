@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <script src="scrabble.mjs" type ="module"></script>
+        <script src="dragAndDrop.mjs" type ="module"></script>
+        <script src="gamePlayAndScoring.mjs" type ="module"></script>
+        <script src="audio.mjs" type ="module"></script>
+        <link rel="stylesheet" href= "style.css">
+        <link rel="icon" type="image/png" href="images/logo.png">
+        <title>SCRABBLE</title>
+    </head>
+    <body>
+        <main id="main">
+            <div id= board class="transition">
+                <div id="table">
+                        <button id="pause" type="submit"></button>
+                    <div id="result">
+                        <p>Play a word on the board to check if it's valid</p>
+                    </div>
+                </div>
+            </div>
+            <div id="gameRule">
+            </div>
+            <audio id="backgroundMusic" >
+                <source src="audio/Gaming.mp3"></source>
+            </audio>
+            <audio id="audioMusic">
+                <source src="audio/finger-snap.ogg"></source>
+            </audio>
+            <audio id="buttonMusic">
+                <source src="audio/finger-snap2.ogg"></source>
+            </audio>
+            <div id= letterboard>
+                    <button id="unMute" type="submit"></button>
+                    <button id="mute" type="submit"></button>
+                    <button id="playWord" type="submit">play</button>
+                    <button id="refillTile" type="submit">refill tile</button>
+            </div>
+            <div id= hintBoard>
+                <button id= hint type="submit"></button>
+                <div id=hintText>⬅️Click quick tip for hint</div>
+            </div>
+            <div>
+                <button id="homeButton" class = "home" type="submit"></button>
+                <button id="resumeGame" class = "home" type="submit"></button>
+            </div>
+            <div id="menu" type=submit>
+                <h1 id="scrabble"></h1>
+                <button id="play" type="submit">Play</button>
+                <button id="rules" type="submit">Rules</button>
+                <button id="options" type="submit">Options</button>
+            </div>
+        </main>
+    </body>
+</html>
+
+

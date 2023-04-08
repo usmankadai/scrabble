@@ -1,0 +1,299 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+body{
+    font-family: sans-serif;
+    background: url(images/css.jpg);
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+}
+#board, #letterboard, #gameRule, #hintBoard{
+    opacity: 0;
+}
+#board.visible, #letterboard.visible, #hintBoard.visible, #gameRule.displayOption{
+    opacity: 1;
+    transition: all .5s ease-in;
+}
+
+#dropzone1, #dropzone8, #dropzone15, #dropzone106, #dropzone120, #dropzone211, #dropzone218, #dropzone225{
+    background: red;
+    color: white;
+}
+#dropzone4, #dropzone12, #dropzone37, #dropzone39, #dropzone46, #dropzone53, #dropzone60, #dropzone93, #dropzone97, #dropzone99, #dropzone103, #dropzone109, #dropzone117, #dropzone123, #dropzone127, #dropzone129, #dropzone133, #dropzone166, #dropzone173, #dropzone180, #dropzone187, #dropzone189, #dropzone214, #dropzone222{
+    background: skyblue;
+}
+#dropzone17, #dropzone29, #dropzone33, #dropzone43,  #dropzone49, #dropzone57, #dropzone65, #dropzone71, #dropzone113, #dropzone155, #dropzone161, #dropzone169, #dropzone177, #dropzone183, #dropzone193, #dropzone197, #dropzone209{
+    background: #F1A0F9;
+}
+#dropzone21, #dropzone25, #dropzone77, #dropzone81, #dropzone85, #dropzone141, #dropzone145, #dropzone89, #dropzone137, #dropzone149, #dropzone201, #dropzone205{
+    background: #003CF2;
+    color: white;
+}
+#board{
+    display: grid;
+    grid-template-columns: repeat(15, 2.9em);
+    grid-template-rows: repeat(15, 2.9em);
+    justify-content: center;
+    width: 60vw;
+}
+div>div{
+    position: relative;
+    text-align: center;
+    font-size: 1.1em;
+    border: solid rgb(88, 83, 83) thin;
+    background: url(images/css2.webp);
+}
+#board .letters{
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+}
+#scoreR{
+    position: absolute;
+    top: 28rem;
+    right: 2rem;
+    width:40rem;
+    height:22rem;
+    padding: 0 0 0.2rem 0;
+    color: white;
+    text-align: center;
+    border-image: url(images/css2.webp); 
+    border-radius: 1.563rem 1.563rem 1.563rem 1.563rem;
+    background: url(images/css2.webp);  
+    box-shadow:         0 0.625rem 0.625rem 0 rgb(19, 16, 16);
+}
+
+li{
+    text-align: left;
+    font-size: 1.3rem;
+    margin: 1rem 0 0 0;
+}
+.letters{
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    width:2.7rem;
+    height:2.7rem;
+    text-align: center;
+    color: white;
+    font-size: 2em;
+    border-image: url(images/trial3.jpg);
+    border-radius: 0.625rem 0.625rem 0.625rem 0.625rem;
+    background: url(images/trial3.jpg);
+}
+#letterboard, #hintBoard{
+    position: absolute;
+    top: 43.7rem;
+    display: flex;
+    flex-direction: row;
+    text-align: center;
+    width:40rem;
+    height:3.7rem;
+    border-image: url(images/css2.webp); 
+    border-radius: 0.938rem 0.938rem 0.938rem 0.938rem;
+    background: url(images/css2.webp);   
+    margin: 0 0 0 7rem;
+    box-shadow:         0 0.625rem 0.625rem 0 rgb(19, 16, 16);
+}
+#hintBoard{
+    top: 48.2rem;
+    height:2.7rem;
+}
+
+@keyframes glowing {
+    60% { box-shadow: 0 0 0 0.25rem #00ffea; }
+}
+#hint {
+    animation: glowing 5000ms infinite;
+}
+/* css2.webp Referenced from https://freedesignfile.com/upload/2016/10/HD-picture-Smooth-wood-texture-desktop.jpg */
+.letterbox, #playWord, #refillTile, #mute, #unMute, #hint{
+    font-size: 1rem;
+    color: white;
+    text-align: center;
+    width:2.7rem;
+    height:2.7rem;
+    border-image: url(images/css.jpg); 
+    border-radius: 0.938rem 0.938rem 0.938rem 0.938rem;
+    background: url(images/css.jpg);  
+    margin: 0.5rem 0 0.5rem 0.8rem;
+    box-shadow:         0 0.625rem 0.625rem 0 rgb(19, 16, 16);
+    position: relative;
+}
+/* hint.jpeg Referenced from https://thumbs.dreamstime.com/z/quick-tip-bulb-icon-special-yellow-round-button-isolated-abstract-illustration-105863422.jpg */
+#hint{
+    background: url(images/hint.jpeg);
+    background-size: 1.9rem;
+    width:2rem;
+    height:2rem;
+}
+/* mute.webp Refrenced from https://image.shutterstock.com/image-illustration/music-off-button-isolated-600w-391209244.jpg */
+#mute{
+    background: url(images/mute.webp);
+    background-size: 2.7rem;
+    width:2.8rem;
+    height:2.8rem;
+}
+/* unmute.webp Refrenced from https://image.shutterstock.com/image-illustration/musical-note-icon-internet-button-600w-452130910.jpg */
+#unMute{
+    background: url(images/unmute.webp);
+    background-size: 2.7rem;
+    width:2.8rem;
+    height:2.8rem;
+}
+/* css.jpg Refrenced from https://cssauthor.com/wp-content/uploads/2019/10/Free-Wooden-Floor-Textures.jpg */
+#scrabble, #play, #options, #rules{
+    font-size: 4rem;
+    display: flex;
+    flex-direction: flex wrap;
+    justify-content: center;
+    width:15rem;
+    height:6rem;
+    margin: 2rem 0 0.5rem 38rem;
+    padding: 0 0 0.2rem 0;
+    color: white;
+    text-align: center;
+    border-image: url(images/css2.webp); 
+    border-radius: 1.563rem 1.563rem 1.563rem 1.563rem;
+    background: url(images/css2.webp);  
+    box-shadow:         0 0.625rem 0.625rem 0 rgb(19, 16, 16);
+    position: relative;
+    top: 22rem;
+}
+#scrabble{
+    /* Image Referenced from  https://www.dgwgo.com/wp-content/uploads/2019/01/Scrabble-Logo-Small.jpg */
+    width:17rem;
+    height:14rem;
+    position: absolute;
+    background: url(images/Scrabble-Logo-Small.jpeg); 
+    background-size: 17rem;
+    top: 0rem;
+    right: 36rem;
+}
+#menu{
+    /* Image Referenced from https://www.telegraph.co.uk/content/dam/news/2016/09/04/Scrabble_trans_NvBQzQNjv4BqKrFT9G4qTjTaHIhgTJtmhYTEgzGPXWji_BKujygcEgY.jpg?imwidth=1400 */
+    background: url(images/people.webp);
+    background-size: 90rem;
+    height: 51.3rem;
+    width: 90rem;
+    position: absolute;
+    top: 0;
+}
+#table{
+    font-size: 1.7rem;
+    font-weight: bold;
+    justify-content: center;
+    width:38rem;
+    height:50rem;
+    margin: 0 0 0 50rem;
+    padding: 0 0 0.2rem 0;
+    color: white;
+    text-align: center;
+    border-image: url(images/css2.webp); 
+    border-radius: 1.563rem 1.563rem 1.563rem 1.563rem;
+    background: url(images/css2.webp);  
+    box-shadow:         0 0.625rem 0.625rem 0 rgb(19, 16, 16);
+    position: absolute;
+}
+#scores, #letterScore, #word, #scores, #result, #tilesLeft, #hintText{
+    font-size: 1.7rem;
+    height: 14.5rem;
+    width: 35rem; 
+    margin: 0.8rem 0 0.5rem 1.5rem;
+    padding: 0 0 0.2rem 0;
+    color: white;
+    text-align: center;
+    border-image: url(images/css.jpg); 
+    border-radius: 1.563rem 1.563rem 1.563rem 1.563rem;
+    background: url(images/css.jpg);  
+    box-shadow:         0 0.625rem 0.625rem 0 rgb(19, 16, 16);
+}
+#hintText{
+    height: 1.5rem;
+    font-size: 1rem;
+    margin: 0.1rem 0 0 1.5rem;
+}
+#scores{
+    height: 10rem;
+}
+#result{
+    font-size: 0.8rem;
+    width: 24rem; 
+    height: 1rem;
+    margin: 0.5rem 0 0.5rem 4.5rem;
+}
+#input{
+    margin: 0 5rem 0 0;
+    font-size: 1rem;
+    width: 28rem; 
+    height: 1.5rem;
+}
+#tilesLeft{
+    width: 28rem; 
+    height: 2rem;
+    margin: 1rem 0 0.5rem 5.5rem;
+}
+.scroll{
+    overflow-y: scroll;
+}
+.wordsPlayed, .scoring{
+    display: block;
+    width:32rem;
+    height:2rem;
+    margin: 0.2rem 0 0 1.5rem;
+    text-align: center;
+    border-image: url(images/css2.webp); 
+    border-radius: 0.938rem 0.938rem 0.938rem 0.938rem;
+    background: url(images/css2.webp);  
+    box-shadow:         0 0.625rem 0.625rem 0 rgb(19, 16, 16);
+}
+#submit, #pause, .home{
+    position: absolute;
+    top: 0;
+    right: 3rem;
+    font-size: 1rem;
+    color: white;
+    text-align: center;
+    width:3.125rem;
+    height:3.125rem;
+    border-image: url(images/css.jpg); 
+    border-radius: 0.938rem 0.938rem 0.938rem 0.938rem;
+    background: url(images/css.jpg);  
+    box-shadow:         0 0.625rem 0.625rem 0 rgb(19, 16, 16);
+}
+#pause{
+    position: absolute;
+    top: 10rem;
+    right: 83rem;
+    background: url(images/pause.jpg);
+    background-size: 3.125rem;
+    width:3.125rem;
+    height:3.125rem;
+}
+/* home.jpeg Referenced from https://icons4web.com/wp-content/uploads/2017/11/Home-gold-icon-199452.jpg */
+.home{
+    position: absolute;
+    top: 2rem;
+    right: 85rem;
+    background: url(images/home.jpeg);
+    background-size: 3.125rem;
+    width:3.125rem;
+    height:3.125rem;
+}
+/* play.jpg Referenced from https://icons4web.com/wp-content/uploads/2017/11/Home-gold-icon-199452.jpg */
+#resumeGame{
+    position: absolute;
+    top: 6rem;
+    right: 85rem;
+    /* Image Referenced from  */
+    background: url(images/play.jpg);
+    background-size: 3.125rem;
+}
+#li12{
+    font-size: 3rem;
+}
+

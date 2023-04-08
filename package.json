@@ -1,0 +1,32 @@
+{
+  "name": "scrabble",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node svr.js",
+    "test": "http-server"
+  },
+  "author": "UP969376",
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "^7.21.0",
+    "eslint-config-portsoc": "github:portsoc/eslint-config-portsoc",
+    "http-server": "^0.12.3",
+    "jslint": "^0.12.1",
+    "package": "^1.0.1",
+    "start-server-and-test": "^1.12.0"
+  },
+  "eslintConfig": {
+    "extends": "portsoc",
+    "root": true,
+    "env": {
+      "browser": true
+    }
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "open": "^8.0.4",
+    "socket.io": "^4.0.1"
+  },
+  "description": "scrabble app"
+}
