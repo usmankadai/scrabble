@@ -2,6 +2,7 @@
 <html>
     <head>
         <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script src="scrabble.mjs" type ="module"></script>
         <script src="dragAndDrop.mjs" type ="module"></script>
         <script src="gamePlayAndScoring.mjs" type ="module"></script>
@@ -12,15 +13,37 @@
     </head>
     <body>
         <main id="main">
-            <div id= board class="transition">
-                <div id="table">
-                        <button id="pause" type="submit"></button>
-                    <div id="result">
-                        <p>Play a word on the board to check if it's valid</p>
-                    </div>
+            <header id="gameHeader">
+                <button id="pauseToggle" type="submit" aria-label="Pause"></button>
+            </header>
+            <div id="boardColumn">
+                <div id= board class="transition">
+                </div>
+                <div id= letterboard>
+                        <button id="audioToggle" class="muted" type="submit"></button>
+                        <button id="playWord" type="submit">play</button>
+                        <button id="refillTile" type="submit">refill tile</button>
+                </div>
+                <div id= hintBoard>
+                    <button id= hint type="submit"></button>
+                    <div id=hintText>⬅️Click quick tip for hint</div>
+                </div>
+            </div>
+            <div id="table">
+                <div id="result">
+                    <p>Play a word on the board to check if it's valid</p>
                 </div>
             </div>
             <div id="gameRule">
+                <button id="rulesBack" type="submit">← Back</button>
+            </div>
+            <div id="pauseOverlay">
+                <div class="pauseCard">
+                    <h2>Game Paused</h2>
+                    <p>Take a breather. Your progress is saved.</p>
+                    <button id="resumeBtn" type="submit">Resume</button>
+                    <button id="pauseHome" type="submit"><span class="homeIcon"></span>Back to Menu</button>
+                </div>
             </div>
             <audio id="backgroundMusic" >
                 <source src="audio/Gaming.mp3"></source>
@@ -31,20 +54,6 @@
             <audio id="buttonMusic">
                 <source src="audio/finger-snap2.ogg"></source>
             </audio>
-            <div id= letterboard>
-                    <button id="unMute" type="submit"></button>
-                    <button id="mute" type="submit"></button>
-                    <button id="playWord" type="submit">play</button>
-                    <button id="refillTile" type="submit">refill tile</button>
-            </div>
-            <div id= hintBoard>
-                <button id= hint type="submit"></button>
-                <div id=hintText>⬅️Click quick tip for hint</div>
-            </div>
-            <div>
-                <button id="homeButton" class = "home" type="submit"></button>
-                <button id="resumeGame" class = "home" type="submit"></button>
-            </div>
             <div id="menu" type=submit>
                 <h1 id="scrabble"></h1>
                 <button id="play" type="submit">Play</button>
@@ -52,6 +61,21 @@
                 <button id="options" type="submit">Options</button>
             </div>
         </main>
+
+        <!-- SOCKET.IO -->
+        <script src="/socket.io/socket.io.js"></script>
+
+        <script>
+            const socket = io();
+
+            socket.on('connect', () => {
+                console.log('Connected to Socket.IO server');
+            });
+
+            socket.on('message', (msg) => {
+                console.log(msg);
+            });
+        </script>
     </body>
 </html>
 

@@ -1,20 +1,47 @@
 *{
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
 }
 body{
     font-family: sans-serif;
-    background: url(images/css.jpg);
-    height: 100vh;
-    width: 100vw;
-    overflow: hidden;
+    background: url(images/css.jpg) center/cover fixed;
+    min-height: 100vh;
+    width: 100%;
+    overflow-x: hidden;
 }
-#board, #letterboard, #gameRule, #hintBoard{
+
+#main {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 1.5rem;
+    padding: 5rem 1.5rem 1.5rem;
+    min-height: 100vh;
+}
+
+#board, #letterboard, #hintBoard, #table{
     opacity: 0;
+    pointer-events: none;
 }
-#board.visible, #letterboard.visible, #hintBoard.visible, #gameRule.displayOption{
+#gameRule, #gameHeader, #pauseOverlay{
+    display: none;
+}
+#board.visible, #letterboard.visible, #hintBoard.visible, #table.visible{
     opacity: 1;
-    transition: all .5s ease-in;
+    pointer-events: auto;
+    transition: opacity .5s ease-in;
+}
+#gameRule.displayOption{
+    display: flex;
+}
+#gameHeader.visible{
+    display: flex;
+}
+#pauseOverlay.visible{
+    display: flex;
 }
 
 #dropzone1, #dropzone8, #dropzone15, #dropzone106, #dropzone120, #dropzone211, #dropzone218, #dropzone225{
@@ -31,77 +58,124 @@ body{
     background: #003CF2;
     color: white;
 }
-#board{
-    display: grid;
-    grid-template-columns: repeat(15, 2.9em);
-    grid-template-rows: repeat(15, 2.9em);
-    justify-content: center;
-    width: 60vw;
+
+/* Board column wraps board + letterboard + hint */
+#boardColumn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
 }
-div>div{
+
+#board{
+    --cell: clamp(1.4rem, 5vmin, 3.2rem);
+    display: grid;
+    grid-template-columns: repeat(15, var(--cell));
+    grid-template-rows: repeat(15, var(--cell));
+    justify-content: center;
+    width: max-content;
+    max-width: 100%;
+}
+.dropzone{
     position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     text-align: center;
-    font-size: 1.1em;
+    font-size: 0.7em;
+    line-height: 1.1;
     border: solid rgb(88, 83, 83) thin;
     background: url(images/css2.webp);
+    overflow: hidden;
 }
 #board .letters{
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
 }
 #scoreR{
-    position: absolute;
-    top: 28rem;
-    right: 2rem;
-    width:40rem;
-    height:22rem;
-    padding: 0 0 0.2rem 0;
+    width:100%;
+    max-width: 40rem;
+    padding: 1rem;
     color: white;
     text-align: center;
-    border-image: url(images/css2.webp); 
-    border-radius: 1.563rem 1.563rem 1.563rem 1.563rem;
-    background: url(images/css2.webp);  
-    box-shadow:         0 0.625rem 0.625rem 0 rgb(19, 16, 16);
+    border-image: url(images/css2.webp);
+    border-radius: 1.563rem;
+    background: url(images/css2.webp);
+    box-shadow: 0 0.625rem 0.625rem 0 rgb(19, 16, 16);
 }
 
 li{
     text-align: left;
-    font-size: 1.3rem;
-    margin: 1rem 0 0 0;
+    font-size: 1.1rem;
+    margin: 0.8rem 0 0 1.5rem;
 }
 .letters{
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    width:2.7rem;
-    height:2.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     text-align: center;
     color: white;
-    font-size: 2em;
+    font-size: 1.6em;
+    line-height: 1;
     border-image: url(images/trial3.jpg);
-    border-radius: 0.625rem 0.625rem 0.625rem 0.625rem;
-    background: url(images/trial3.jpg);
+    border-radius: 0.5rem;
+    background: url(images/trial3.jpg) center/cover;
+    box-sizing: border-box;
 }
-#letterboard, #hintBoard{
-    position: absolute;
-    top: 43.7rem;
+
+/* Letterboard: rack tiles fill the width evenly */
+#letterboard{
     display: flex;
     flex-direction: row;
-    text-align: center;
-    width:40rem;
-    height:3.7rem;
-    border-image: url(images/css2.webp); 
-    border-radius: 0.938rem 0.938rem 0.938rem 0.938rem;
-    background: url(images/css2.webp);   
-    margin: 0 0 0 7rem;
-    box-shadow:         0 0.625rem 0.625rem 0 rgb(19, 16, 16);
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-evenly;
+    gap: 0.4rem;
+    padding: 0.5rem;
+    width: 100%;
+    max-width: 40rem;
+    min-height: 4rem;
+    border-image: url(images/css2.webp);
+    border-radius: 0.938rem;
+    background: url(images/css2.webp);
+    box-shadow: 0 0.625rem 0.625rem 0 rgb(19, 16, 16);
 }
+
+#letterboard .letterbox {
+    flex: 1 1 0;
+    min-width: 2.5rem;
+    max-width: 4rem;
+    aspect-ratio: 1 / 1;
+    height: auto;
+    margin: 0;
+    position: relative;
+}
+#letterboard .letterbox .letters {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    font-size: 1.4em;
+}
+
 #hintBoard{
-    top: 48.2rem;
-    height:2.7rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    max-width: 40rem;
+    min-height: 2.7rem;
+    padding: 0 0.6rem;
+    border-image: url(images/css2.webp);
+    border-radius: 0.938rem;
+    background: url(images/css2.webp);
+    box-shadow: 0 0.625rem 0.625rem 0 rgb(19, 16, 16);
+    gap: 0.6rem;
 }
 
 @keyframes glowing {
@@ -110,190 +184,348 @@ li{
 #hint {
     animation: glowing 5000ms infinite;
 }
-/* css2.webp Referenced from https://freedesignfile.com/upload/2016/10/HD-picture-Smooth-wood-texture-desktop.jpg */
-.letterbox, #playWord, #refillTile, #mute, #unMute, #hint{
-    font-size: 1rem;
+
+.letterbox, #playWord, #refillTile, #audioToggle, #hint{
+    font-size: 0.95rem;
     color: white;
     text-align: center;
-    width:2.7rem;
-    height:2.7rem;
-    border-image: url(images/css.jpg); 
-    border-radius: 0.938rem 0.938rem 0.938rem 0.938rem;
-    background: url(images/css.jpg);  
-    margin: 0.5rem 0 0.5rem 0.8rem;
-    box-shadow:         0 0.625rem 0.625rem 0 rgb(19, 16, 16);
-    position: relative;
+    width: 2.7rem;
+    height: 2.7rem;
+    border: none;
+    border-image: url(images/css.jpg);
+    border-radius: 0.7rem;
+    background: url(images/css.jpg);
+    box-shadow: 0 0.4rem 0.6rem 0 rgb(19, 16, 16);
+    cursor: pointer;
+    flex-shrink: 0;
 }
-/* hint.jpeg Referenced from https://thumbs.dreamstime.com/z/quick-tip-bulb-icon-special-yellow-round-button-isolated-abstract-illustration-105863422.jpg */
+
+#playWord, #refillTile {
+    padding: 0 0.4rem;
+    min-width: 3.5rem;
+    width: auto;
+}
+
 #hint{
-    background: url(images/hint.jpeg);
-    background-size: 1.9rem;
-    width:2rem;
-    height:2rem;
-}
-/* mute.webp Refrenced from https://image.shutterstock.com/image-illustration/music-off-button-isolated-600w-391209244.jpg */
-#mute{
-    background: url(images/mute.webp);
-    background-size: 2.7rem;
-    width:2.8rem;
-    height:2.8rem;
-}
-/* unmute.webp Refrenced from https://image.shutterstock.com/image-illustration/musical-note-icon-internet-button-600w-452130910.jpg */
-#unMute{
-    background: url(images/unmute.webp);
-    background-size: 2.7rem;
-    width:2.8rem;
-    height:2.8rem;
-}
-/* css.jpg Refrenced from https://cssauthor.com/wp-content/uploads/2019/10/Free-Wooden-Floor-Textures.jpg */
-#scrabble, #play, #options, #rules{
-    font-size: 4rem;
-    display: flex;
-    flex-direction: flex wrap;
-    justify-content: center;
-    width:15rem;
-    height:6rem;
-    margin: 2rem 0 0.5rem 38rem;
-    padding: 0 0 0.2rem 0;
-    color: white;
-    text-align: center;
-    border-image: url(images/css2.webp); 
-    border-radius: 1.563rem 1.563rem 1.563rem 1.563rem;
-    background: url(images/css2.webp);  
-    box-shadow:         0 0.625rem 0.625rem 0 rgb(19, 16, 16);
-    position: relative;
-    top: 22rem;
-}
-#scrabble{
-    /* Image Referenced from  https://www.dgwgo.com/wp-content/uploads/2019/01/Scrabble-Logo-Small.jpg */
-    width:17rem;
-    height:14rem;
-    position: absolute;
-    background: url(images/Scrabble-Logo-Small.jpeg); 
-    background-size: 17rem;
-    top: 0rem;
-    right: 36rem;
-}
-#menu{
-    /* Image Referenced from https://www.telegraph.co.uk/content/dam/news/2016/09/04/Scrabble_trans_NvBQzQNjv4BqKrFT9G4qTjTaHIhgTJtmhYTEgzGPXWji_BKujygcEgY.jpg?imwidth=1400 */
-    background: url(images/people.webp);
-    background-size: 90rem;
-    height: 51.3rem;
-    width: 90rem;
-    position: absolute;
-    top: 0;
-}
-#table{
-    font-size: 1.7rem;
-    font-weight: bold;
-    justify-content: center;
-    width:38rem;
-    height:50rem;
-    margin: 0 0 0 50rem;
-    padding: 0 0 0.2rem 0;
-    color: white;
-    text-align: center;
-    border-image: url(images/css2.webp); 
-    border-radius: 1.563rem 1.563rem 1.563rem 1.563rem;
-    background: url(images/css2.webp);  
-    box-shadow:         0 0.625rem 0.625rem 0 rgb(19, 16, 16);
-    position: absolute;
-}
-#scores, #letterScore, #word, #scores, #result, #tilesLeft, #hintText{
-    font-size: 1.7rem;
-    height: 14.5rem;
-    width: 35rem; 
-    margin: 0.8rem 0 0.5rem 1.5rem;
-    padding: 0 0 0.2rem 0;
-    color: white;
-    text-align: center;
-    border-image: url(images/css.jpg); 
-    border-radius: 1.563rem 1.563rem 1.563rem 1.563rem;
-    background: url(images/css.jpg);  
-    box-shadow:         0 0.625rem 0.625rem 0 rgb(19, 16, 16);
+    background: url(images/hint.jpeg) center/cover;
+    width: 2rem;
+    height: 2rem;
 }
 #hintText{
-    height: 1.5rem;
-    font-size: 1rem;
-    margin: 0.1rem 0 0 1.5rem;
+    flex: 1;
+    color: white;
+    text-align: center;
+    font-size: 0.95rem;
 }
-#scores{
-    height: 10rem;
+
+/* Audio toggle: swap icon based on muted state */
+#audioToggle{
+    background: url(images/mute.webp) center/cover;
+    width: 2.7rem;
+    height: 2.7rem;
+}
+#audioToggle:not(.muted){
+    background: url(images/unmute.webp) center/cover;
+}
+
+/* Menu */
+#play, #options, #rules{
+    font-size: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 14rem;
+    height: 5rem;
+    margin: 0.6rem auto;
+    color: white;
+    text-align: center;
+    border-image: url(images/css2.webp);
+    border-radius: 1.5rem;
+    background: url(images/css2.webp);
+    box-shadow: 0 0.625rem 0.625rem 0 rgb(19, 16, 16);
+    cursor: pointer;
+    border: none;
+}
+#scrabble{
+    width: 16rem;
+    height: 13rem;
+    margin: 0 auto 1rem auto;
+    background: url(images/Scrabble-Logo-Small.jpeg) center/contain no-repeat;
+}
+#menu{
+    background: url(images/people.webp) center/cover no-repeat;
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    overflow-y: auto;
+    z-index: 100;
+}
+
+/* Table (info panel) */
+#table{
+    font-size: 1.5rem;
+    font-weight: bold;
+    width: 100%;
+    max-width: 38rem;
+    padding: 1rem;
+    color: white;
+    text-align: center;
+    border-image: url(images/css2.webp);
+    border-radius: 1.5rem;
+    background: url(images/css2.webp);
+    box-shadow: 0 0.625rem 0.625rem 0 rgb(19, 16, 16);
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+#scores, #letterScore, #word, #result, #tilesLeft{
+    font-size: 1.4rem;
+    width: 100%;
+    padding: 0.8rem 1rem;
+    color: white;
+    text-align: center;
+    border-image: url(images/css.jpg);
+    border-radius: 1.2rem;
+    background: url(images/css.jpg);
+    box-shadow: 0 0.4rem 0.6rem 0 rgb(19, 16, 16);
+    margin: 0;
 }
 #result{
-    font-size: 0.8rem;
-    width: 24rem; 
-    height: 1rem;
-    margin: 0.5rem 0 0.5rem 4.5rem;
+    font-size: 1rem;
+    padding: 0.6rem;
 }
 #input{
-    margin: 0 5rem 0 0;
     font-size: 1rem;
-    width: 28rem; 
+    width: 100%;
     height: 1.5rem;
 }
-#tilesLeft{
-    width: 28rem; 
-    height: 2rem;
-    margin: 1rem 0 0.5rem 5.5rem;
-}
 .scroll{
-    overflow-y: scroll;
+    overflow-y: auto;
+    max-height: 18rem;
 }
 .wordsPlayed, .scoring{
     display: block;
-    width:32rem;
-    height:2rem;
-    margin: 0.2rem 0 0 1.5rem;
+    width: 100%;
+    padding: 0.4rem 0;
+    margin: 0.3rem 0;
     text-align: center;
-    border-image: url(images/css2.webp); 
-    border-radius: 0.938rem 0.938rem 0.938rem 0.938rem;
-    background: url(images/css2.webp);  
-    box-shadow:         0 0.625rem 0.625rem 0 rgb(19, 16, 16);
-}
-#submit, #pause, .home{
-    position: absolute;
-    top: 0;
-    right: 3rem;
-    font-size: 1rem;
-    color: white;
-    text-align: center;
-    width:3.125rem;
-    height:3.125rem;
-    border-image: url(images/css.jpg); 
-    border-radius: 0.938rem 0.938rem 0.938rem 0.938rem;
-    background: url(images/css.jpg);  
-    box-shadow:         0 0.625rem 0.625rem 0 rgb(19, 16, 16);
-}
-#pause{
-    position: absolute;
-    top: 10rem;
-    right: 83rem;
-    background: url(images/pause.jpg);
-    background-size: 3.125rem;
-    width:3.125rem;
-    height:3.125rem;
-}
-/* home.jpeg Referenced from https://icons4web.com/wp-content/uploads/2017/11/Home-gold-icon-199452.jpg */
-.home{
-    position: absolute;
-    top: 2rem;
-    right: 85rem;
-    background: url(images/home.jpeg);
-    background-size: 3.125rem;
-    width:3.125rem;
-    height:3.125rem;
-}
-/* play.jpg Referenced from https://icons4web.com/wp-content/uploads/2017/11/Home-gold-icon-199452.jpg */
-#resumeGame{
-    position: absolute;
-    top: 6rem;
-    right: 85rem;
-    /* Image Referenced from  */
-    background: url(images/play.jpg);
-    background-size: 3.125rem;
-}
-#li12{
-    font-size: 3rem;
+    border-image: url(images/css2.webp);
+    border-radius: 0.8rem;
+    background: url(images/css2.webp);
+    box-shadow: 0 0.4rem 0.6rem 0 rgb(19, 16, 16);
 }
 
+/* Game header bar with home + pause */
+#gameHeader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.6rem 1rem;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0));
+    z-index: 50;
+}
+#gameHeader button {
+    width: 3rem;
+    height: 3rem;
+    border: none;
+    border-radius: 0.7rem;
+    background-color: rgba(0,0,0,0.4);
+    background-size: cover;
+    box-shadow: 0 0.4rem 0.6rem 0 rgb(19, 16, 16);
+    cursor: pointer;
+}
+.home {
+    background: url(images/home.jpeg) center/cover;
+}
+#pauseToggle {
+    background: url(images/pause.jpg) center/cover;
+}
+#pauseToggle.paused {
+    background: url(images/play.jpg) center/cover;
+}
+
+/* Pause overlay */
+#pauseOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    align-items: center;
+    justify-content: center;
+    z-index: 90;
+    padding: 2rem;
+}
+#pauseOverlay .pauseCard {
+    background: url(images/css2.webp) center/cover;
+    border-radius: 1.5rem;
+    padding: 2.5rem 3rem;
+    color: white;
+    text-align: center;
+    box-shadow: 0 1rem 1.5rem rgba(0,0,0,0.5);
+    max-width: 90vw;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+}
+#pauseOverlay h2 {
+    font-size: 2.2rem;
+    margin-bottom: 0.5rem;
+}
+#pauseOverlay p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-bottom: 0.5rem;
+}
+#pauseOverlay button {
+    font-size: 1.3rem;
+    width: 14rem;
+    padding: 0.8rem 1.2rem;
+    color: white;
+    border: none;
+    border-radius: 1rem;
+    background: url(images/css.jpg) center/cover;
+    box-shadow: 0 0.5rem 0.8rem rgba(0,0,0,0.4);
+    cursor: pointer;
+}
+#pauseOverlay button:hover {
+    transform: translateY(-2px);
+    transition: transform 0.15s;
+}
+#pauseOverlay #pauseHome {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+.homeIcon {
+    display: inline-block;
+    width: 1.4rem;
+    height: 1.4rem;
+    background: url(images/home.jpeg) center/cover;
+    border-radius: 0.3rem;
+    flex-shrink: 0;
+}
+
+/* Rules screen */
+#gameRule {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 1rem;
+    overflow-y: auto;
+    z-index: 80;
+}
+#gameRule #rulesBack {
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    font-size: 1.1rem;
+    padding: 0.6rem 1.2rem;
+    color: white;
+    border: none;
+    border-radius: 0.8rem;
+    background: url(images/css.jpg) center/cover;
+    box-shadow: 0 0.4rem 0.6rem rgba(0,0,0,0.4);
+    cursor: pointer;
+    margin-bottom: 1rem;
+    z-index: 1;
+}
+#gameRule #scoreR {
+    width: 100%;
+    max-width: 50rem;
+    max-height: none;
+    padding: 2rem;
+    color: white;
+    background: url(images/css2.webp) center/cover;
+    border-radius: 1.5rem;
+    box-shadow: 0 0.625rem 0.625rem rgba(0,0,0,0.5);
+    overflow: visible;
+}
+#gameRule h1 {
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+#gameRule li {
+    font-size: 1.05rem;
+    line-height: 1.5;
+    margin: 0.8rem 0 0 1.5rem;
+    text-align: left;
+    list-style: disc;
+}
+#gameRule #li12 {
+    font-size: 2rem;
+    list-style: none;
+    margin: 1.5rem 0 0.5rem 0;
+    text-align: center;
+    font-weight: bold;
+}
+
+/* Desktop & tablet: board and table side by side */
+@media (min-width: 1024px) {
+    #main {
+        flex-wrap: nowrap;
+    }
+}
+
+/* Tablet & below: stack columns, letterboard right after board */
+@media (max-width: 1023px) {
+    #main {
+        flex-direction: column;
+        align-items: center;
+        padding: 1rem;
+    }
+    #boardColumn {
+        order: 1;
+        width: 100%;
+        max-width: 40rem;
+    }
+    #table {
+        order: 2;
+    }
+    #board{
+        --cell: min(3.2rem, calc((100vw - 3rem) / 15));
+    }
+}
+
+@media (max-width: 600px) {
+    html { font-size: 14px; }
+    #scrabble {
+        width: 12rem;
+        height: 9rem;
+    }
+    #play, #options, #rules {
+        font-size: 2rem;
+        width: 11rem;
+        height: 4rem;
+    }
+    #table {
+        font-size: 1.1rem;
+    }
+    #scores, #letterScore, #word, #result, #tilesLeft {
+        font-size: 1.05rem;
+    }
+    #letterboard .letterbox {
+        min-width: 1.8rem;
+    }
+    .letterbox, #playWord, #refillTile, #audioToggle{
+        font-size: 0.75rem;
+        width: 2.1rem;
+        height: 2.1rem;
+    }
+    #playWord, #refillTile {
+        min-width: 2.6rem;
+        font-size: 0.7rem;
+    }
+}

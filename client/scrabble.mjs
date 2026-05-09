@@ -360,34 +360,78 @@ function refillNewLetter() {
   drag.initialiseDragging();
 }
 
-function play() {
+const SCREEN_KEY = 'scrabble:screen';
+
+function setScreen(name) {
+  try { localStorage.setItem(SCREEN_KEY, name); } catch (e) { /* ignore */ }
+}
+
+function showGame() {
   document.querySelector('#menu').style.display = 'none';
+  document.querySelector('#gameRule').classList.remove('displayOption');
+  document.querySelector('#pauseOverlay').classList.remove('visible');
   document.querySelector('#board').classList.add('visible');
+  document.querySelector('#table').classList.add('visible');
   document.querySelector('#letterboard').classList.add('visible');
   document.querySelector('#hintBoard').classList.add('visible');
+  document.querySelector('#gameHeader').classList.add('visible');
+  document.querySelector('#pauseToggle').classList.remove('paused');
+}
+function play() {
+  showGame();
+  setScreen('game');
 }
 function instruction() {
   document.querySelector('#menu').style.display = 'none';
   document.querySelector('#gameRule').classList.add('displayOption');
+  setScreen('rules');
+}
+function rulesBack() {
+  document.querySelector('#gameRule').classList.remove('displayOption');
+  document.querySelector('#menu').style.display = 'flex';
+  setScreen('menu');
 }
 function home() {
+  setScreen('menu');
   document.location.reload(true);
 }
-function pause() {
-  document.querySelector('#pause, #letterboard').style.display = 'none';
-  document.querySelector('#letterboard').classList.remove('visible');
-  document.querySelector('#board').classList.remove('visible');
-  document.querySelector('#hintBoard').classList.remove('visible');
+function togglePause() {
+  const btn = document.querySelector('#pauseToggle');
+  const overlay = document.querySelector('#pauseOverlay');
+  const isPaused = btn.classList.contains('paused');
+  if (isPaused) {
+    btn.classList.remove('paused');
+    overlay.classList.remove('visible');
+    setScreen('game');
+  } else {
+    btn.classList.add('paused');
+    overlay.classList.add('visible');
+    setScreen('paused');
+  }
+}
+function restoreScreen() {
+  let screen = 'menu';
+  try { screen = localStorage.getItem(SCREEN_KEY) || 'menu'; } catch (e) { /* ignore */ }
+  if (screen === 'game') {
+    showGame();
+  } else if (screen === 'paused') {
+    showGame();
+    document.querySelector('#pauseToggle').classList.add('paused');
+    document.querySelector('#pauseOverlay').classList.add('visible');
+  } else if (screen === 'rules') {
+    document.querySelector('#menu').style.display = 'none';
+    document.querySelector('#gameRule').classList.add('displayOption');
+  }
 }
 
 
 function display() {
   document.querySelector('#play').addEventListener('click', play);
-  document.querySelector('.home').addEventListener('click', home);
-  document.querySelector('#homeButton').addEventListener('click', home);
-  document.querySelector('#pause').addEventListener('click', pause);
+  document.querySelector('#pauseToggle').addEventListener('click', togglePause);
   document.querySelector('#rules').addEventListener('click', instruction);
-  document.querySelector('#resumeGame').addEventListener('click', play);
+  document.querySelector('#rulesBack').addEventListener('click', rulesBack);
+  document.querySelector('#resumeBtn').addEventListener('click', togglePause);
+  document.querySelector('#pauseHome').addEventListener('click', home);
   document.querySelector('#hint').addEventListener('click', hintText);
   document.querySelector('#playWord').addEventListener('click', trackLetters);
   // document.querySelector('#playWord').addEventListener('click', score);
@@ -410,6 +454,7 @@ function display() {
   rules.rules();
   document.querySelector('#playWord').addEventListener('click', firstStar);
   // document.querySelector('#play').addEventListener('click', firstStar);
+  restoreScreen();
 }
 
 

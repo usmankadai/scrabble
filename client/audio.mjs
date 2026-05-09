@@ -25,13 +25,19 @@ function muteMusic() {
 }
 
 export function plays() {
-  /* addEventListener() sets up a function that will be called whenever the specified event is delivered to the target
-  */
   document.querySelector('#play').addEventListener('click', buttonM);
   document.querySelector('#rules').addEventListener('click', buttonM);
   document.querySelector('#play').addEventListener('click', unMuteMusic);
   document.querySelector('#rules').addEventListener('click', unMuteMusic);
-  document.querySelector('#unMute').addEventListener('click', unMuteMusic);
-  document.querySelector('#mute').addEventListener('click', muteMusic);
+  const audioToggle = document.querySelector('#audioToggle');
+  audioToggle.addEventListener('click', () => {
+    if (audioToggle.classList.contains('muted')) {
+      audioToggle.classList.remove('muted');
+      unMuteMusic();
+    } else {
+      audioToggle.classList.add('muted');
+      muteMusic();
+    }
+  });
   buttonSound();
 }

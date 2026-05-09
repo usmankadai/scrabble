@@ -4,6 +4,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node svr.js",
+    "dev": "nodemon svr.js",
     "test": "http-server"
   },
   "author": "UP969376",
