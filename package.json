@@ -5,7 +5,8 @@
   "scripts": {
     "start": "node svr.js",
     "dev": "nodemon svr.js",
-    "test": "http-server"
+    "test": "http-server",
+    "build": "echo 'Static site — no compilation needed'"
   },
   "author": "UP969376",
   "license": "ISC",
