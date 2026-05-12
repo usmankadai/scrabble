@@ -51,102 +51,141 @@ function emptyTile(e) {
   }
 }
 
-const nArray = [];
-let wordString = '';
-const alreadyPlayed = [];
-function score() {
-  const letterOnBoards = document.querySelectorAll('.letterOnBoard');
-  const wordsPlayed = document.querySelector('#word');
-  let sumTheTileValue = 0;
-  let addTheLettersTogether = [];
-  for (const letterOnBoard of letterOnBoards) {
-    sumTheTileValue += letterValues[letterOnBoard.textContent];
-    addTheLettersTogether += letterOnBoard.textContent;
-  }
-  /* get all the tiles on the board
-  sum up the values of the tiles
-  report the sum */
+let totalScore = 0;
 
+// Bonus square IDs (match the CSS selectors)
+const tripleWordSquares  = new Set(['dropzone1','dropzone8','dropzone15','dropzone106','dropzone120','dropzone211','dropzone218','dropzone225']);
+const doubleWordSquares  = new Set(['dropzone17','dropzone29','dropzone33','dropzone43','dropzone49','dropzone57','dropzone65','dropzone71','dropzone113','dropzone155','dropzone161','dropzone169','dropzone177','dropzone183','dropzone193','dropzone197','dropzone209']);
+const tripleLetterSquares = new Set(['dropzone21','dropzone25','dropzone77','dropzone81','dropzone85','dropzone89','dropzone137','dropzone141','dropzone145','dropzone149','dropzone201','dropzone205']);
+const doubleLetterSquares = new Set(['dropzone4','dropzone12','dropzone37','dropzone39','dropzone46','dropzone53','dropzone60','dropzone93','dropzone97','dropzone99','dropzone103','dropzone109','dropzone117','dropzone123','dropzone127','dropzone129','dropzone133','dropzone166','dropzone173','dropzone180','dropzone187','dropzone189','dropzone214','dropzone222']);
 
-  // const wordLetter = [];
-  for (let y = 0; y < scoreArray.length; y++) {
-    for (let x = 0; x < scoreArray[y].length; x++) {
-      console.log(scoreArray[y][x]);
-      // if (scoreArray[y][x] !== '') {
-      //   const non = wordLetter.push(scoreArray[y][x]);
-      //   console.log(non);
-      // }
+// Returns the letter at board position (x, y), or null if the cell is empty
+function getLetterAt(x, y) {
+  const dropzone = document.querySelector(`.dropzone[data-x="${x}"][data-y="${y}"]`);
+  if (!dropzone) return null;
+  const tile = dropzone.querySelector('.letters');
+  return tile ? tile.textContent.trim() || null : null;
+}
+
+// Builds an array of cell data for the full word, including committed tiles either side
+// Each cell: { char, dropzoneId, isNew }
+function buildWordCells(positions, isHorizontal) {
+  const newSet = new Set(positions.map(p => `${p.x},${p.y}`));
+  const cells = [];
+
+  if (isHorizontal) {
+    const y = positions[0].y;
+    let minX = Math.min(...positions.map(p => p.x));
+    let maxX = Math.max(...positions.map(p => p.x));
+    while (minX > 1 && getLetterAt(minX - 1, y)) minX--;
+    while (maxX < 15 && getLetterAt(maxX + 1, y)) maxX++;
+    for (let x = minX; x <= maxX; x++) {
+      const char = getLetterAt(x, y);
+      if (!char) return null;
+      const dz = document.querySelector(`.dropzone[data-x="${x}"][data-y="${y}"]`);
+      cells.push({ char, dropzoneId: dz.id, isNew: newSet.has(`${x},${y}`) });
+    }
+  } else {
+    const x = positions[0].x;
+    let minY = Math.min(...positions.map(p => p.y));
+    let maxY = Math.max(...positions.map(p => p.y));
+    while (minY > 1 && getLetterAt(x, minY - 1)) minY--;
+    while (maxY < 15 && getLetterAt(x, maxY + 1)) maxY++;
+    for (let y = minY; y <= maxY; y++) {
+      const char = getLetterAt(x, y);
+      if (!char) return null;
+      const dz = document.querySelector(`.dropzone[data-x="${x}"][data-y="${y}"]`);
+      cells.push({ char, dropzoneId: dz.id, isNew: newSet.has(`${x},${y}`) });
     }
   }
 
-  if (alreadyPlayed.includes(wordString)) {
-    console.log('alreadyPlayed');
-  } else {
-    nArray.push(addTheLettersTogether);
-    alreadyPlayed.push(wordString);
-    wordString = nArray.toString();
-    console.log(wordString);
+  return cells;
+}
+
+// Scores the word applying letter and word bonuses only to newly placed tiles
+function score(cells) {
+  let wordMultiplier = 1;
+  let wordScore = 0;
+
+  for (const cell of cells) {
+    let letterScore = letterValues[cell.char] || 0;
+    if (cell.isNew) {
+      if      (tripleLetterSquares.has(cell.dropzoneId)) letterScore *= 3;
+      else if (doubleLetterSquares.has(cell.dropzoneId)) letterScore *= 2;
+      if      (tripleWordSquares.has(cell.dropzoneId))  wordMultiplier *= 3;
+      else if (doubleWordSquares.has(cell.dropzoneId))  wordMultiplier *= 2;
+    }
+    wordScore += letterScore;
   }
-  const scoring = document.querySelector('#scores');
-  const div = document.createElement('div');
-  div.className = 'scoring';
-  div.textContent = `${sumTheTileValue}`;
-  const div2 = document.createElement('div');
-  div2.className = 'wordsPlayed';
-  div2.textContent = wordString;
-  wordsPlayed.appendChild(div2);
-  scoring.appendChild(div);
 
-  // const childElem = document.querySelectorAll('.letters');
-  // const cr = document.createElement('sub');
-  // const text = document.createTextNode(letterValues[takeRandomLetterFromBag]);
-  // cr.appendChild(text);
-  // childElem.append(cr);
-  // letterValues[letterOnBoard.textContent]
-}
+  wordScore *= wordMultiplier;
+  totalScore += wordScore;
 
-
-function firstStar() {
-  const star = document.querySelector('#dropzone113');
-  if (star.firstElementChild === null) {
-    console.log('The first tile must be on the star');
-    alert('The first tile must be on the star');
-  } else {
-    console.log('first word is on star');
-    score();
+  for (const tile of document.querySelectorAll('.letterOnBoard')) {
+    tile.classList.remove('letterOnBoard');
+    tile.classList.add('committedLetter');
   }
+
+  const word = cells.map(c => c.char).join('');
+  const entry = document.createElement('div');
+  entry.className = 'wordsPlayed';
+  entry.textContent = `${word}: ${wordScore} pts`;
+  document.querySelector('#word').appendChild(entry);
+  document.querySelector('#totalScore').textContent = `${totalScore} pts`;
 }
 
-
-function pageLoaded() {
-  const wordInput = document.querySelector('#playWord');
-  wordInput.addEventListener('click', checkWord);
-}
 async function checkWord() {
-  // const wordInput = document.querySelector('#input');
   const result = document.querySelector('#result');
-  // const letter = document.querySelectorAll('.letterOnBoard');
+  const letterOnBoards = [...document.querySelectorAll('.letterOnBoard')];
 
-  if (wordString === 0) {
-    result.textContent = 'After Spelling each word check validity before playing';
+  if (letterOnBoards.length === 0) {
+    result.textContent = 'Place letters on the board first';
     return;
   }
 
-  const url = 'https://dictionary-dot-sse-2020.nw.r.appspot.com/' + wordString;
-  const response = await fetch(url);
+  // First word must touch the star
+  const star = document.querySelector('#dropzone113');
+  if (star.firstElementChild === null) {
+    result.textContent = 'The first tile must be on the star ★';
+    return;
+  }
 
-  switch (response.status) {
-    case 200:
-      result.textContent = wordString + ' is a valid word. Well done👏';
-      break;
-    case 400:
-      result.textContent = wordString + ' is too short. Try again🙁';
-      break;
-    case 404:
-      result.textContent = wordString + ' is invalid 🚫. Keep trying ';
-      break;
-    default:
-      result.textContent = 'Word validator is not available at this time😖';
+  // Get board positions of new tiles
+  const positions = letterOnBoards.map(tile => ({
+    x: +tile.closest('.dropzone').dataset.x,
+    y: +tile.closest('.dropzone').dataset.y,
+  }));
+
+  const allSameRow = positions.every(p => p.y === positions[0].y);
+  const allSameCol = positions.every(p => p.x === positions[0].x);
+
+  if (!allSameRow && !allSameCol) {
+    result.textContent = 'Tiles must be in a straight line ↔ or ↕';
+    return;
+  }
+
+  const cells = buildWordCells(positions, allSameRow);
+  const word = cells ? cells.map(c => c.char).join('') : null;
+
+  if (!word || word.length < 2) {
+    result.textContent = 'Place at least 2 letters to make a word 🙁';
+    return;
+  }
+
+  result.textContent = 'Checking…';
+
+  try {
+    const url = `https://api.dictionaryapi.dev/api/v2/entries/en/${word.toLowerCase()}`;
+    const response = await fetch(url);
+
+    if (response.ok) {
+      result.textContent = `${word} is a valid word. Well done 👏`;
+      score(cells);
+    } else {
+      result.textContent = `${word} is not a valid word 🚫. Keep trying`;
+    }
+  } catch {
+    result.textContent = 'Word validator is not available at this time 😖';
   }
 }
 
@@ -287,35 +326,38 @@ function middleStar() {
 // this shows the board beside the scrabble board which contains words played, scores, letter scoring guide and tiles left.
 function check() {
   const selector = document.querySelector('#table');
-  const node = document.createElement('div');
-  node.id = 'word';
-  node.className = 'scroll';
-  selector.appendChild(node);
-  const rule = document.querySelector('#word');
-  const node2 = document.createTextNode('Words played:');
-  rule.appendChild(node2);
 
-  const div = document.createElement('div');
-  div.id = 'scores';
-  div.className = 'scroll';
-  selector.appendChild(div);
-  const select = document.querySelector('#scores');
-  const text = document.createTextNode('Scores:');
-  select.appendChild(text);
+  const wordDiv = document.createElement('div');
+  wordDiv.id = 'word';
+  wordDiv.className = 'scroll';
+  wordDiv.appendChild(document.createTextNode('Words played:'));
+  selector.appendChild(wordDiv);
 
-  const div1 = document.createElement('div');
-  div1.id = 'letterScore';
-  selector.appendChild(div1);
-  const selectL = document.querySelector('#letterScore');
-  const guide = document.createTextNode('Letter scoring guide:');
-  selectL.appendChild(guide);
+  const scoresDiv = document.createElement('div');
+  scoresDiv.id = 'scores';
+  scoresDiv.className = 'scroll';
+  scoresDiv.appendChild(document.createTextNode('Total score: '));
+  const totalSpan = document.createElement('span');
+  totalSpan.id = 'totalScore';
+  totalSpan.textContent = '0 pts';
+  scoresDiv.appendChild(totalSpan);
+  selector.appendChild(scoresDiv);
 
-  const div2 = document.createElement('div');
-  div2.id = 'tilesLeft';
-  selector.appendChild(div2);
-  const tileL = document.querySelector('#tilesLeft');
-  const tileLeft = document.createTextNode('Tiles left:100');
-  tileL.appendChild(tileLeft);
+  const guideDiv = document.createElement('div');
+  guideDiv.id = 'letterScore';
+  guideDiv.appendChild(document.createTextNode('Letter scoring guide:'));
+  for (const [letter, value] of Object.entries(letterValues)) {
+    const badge = document.createElement('span');
+    badge.className = 'letterGuideBadge';
+    badge.textContent = `${letter || '?'}=${value}`;
+    guideDiv.appendChild(badge);
+  }
+  selector.appendChild(guideDiv);
+
+  const tilesDiv = document.createElement('div');
+  tilesDiv.id = 'tilesLeft';
+  tilesDiv.appendChild(document.createTextNode('Tiles left: 100'));
+  selector.appendChild(tilesDiv);
 }
 
 let letterTile = 0;
@@ -434,7 +476,7 @@ function display() {
   document.querySelector('#pauseHome').addEventListener('click', home);
   document.querySelector('#hint').addEventListener('click', hintText);
   document.querySelector('#playWord').addEventListener('click', trackLetters);
-  // document.querySelector('#playWord').addEventListener('click', score);
+  document.querySelector('#playWord').addEventListener('click', checkWord);
   document.querySelector('#refillTile').addEventListener('click', refillNewLetter);
   window.addEventListener('drop', emptyTile);
   window.addEventListener('drop', checkDrop);
@@ -446,14 +488,11 @@ function display() {
   middleStar();
   letter();
   check();
-  pageLoaded();
   drag.initialiseDropZone();
   drag.initialiseDragging();
   audio.plays();
   rules.game();
   rules.rules();
-  document.querySelector('#playWord').addEventListener('click', firstStar);
-  // document.querySelector('#play').addEventListener('click', firstStar);
   restoreScreen();
 }
 

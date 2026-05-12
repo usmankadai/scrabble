@@ -14,6 +14,12 @@ function dragOverHandler(e) {
 function dropHandler(e) {
   const data = e.dataTransfer.getData('text/plain');
   const draggable = document.getElementById(data);
+  // Block drop if there is already a committed tile in this cell
+  if (e.currentTarget.querySelector('.committedLetter')) return;
+  // If dragged back to the rack, remove the board marker
+  if (e.currentTarget.classList.contains('letterbox')) {
+    draggable.classList.remove('letterOnBoard');
+  }
   e.currentTarget.append(draggable);
 }
 
@@ -59,7 +65,10 @@ function touchEndHandler(e) {
   touchClone.style.display = '';
 
   const dropzone = target && target.closest('.dropzone, .letterbox');
-  if (dropzone) {
+  if (dropzone && !dropzone.querySelector('.committedLetter')) {
+    if (dropzone.classList.contains('letterbox')) {
+      touchDragging.classList.remove('letterOnBoard');
+    }
     dropzone.append(touchDragging);
   }
 

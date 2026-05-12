@@ -1,43 +1,54 @@
-# UP969376
+# Scrabble
 
-## scrabble
+A browser-based Scrabble game built with vanilla JavaScript, deployed on Vercel.
 
-## Contents of the javaScript
+## Live Demo
 
-* scrabble.mjs -- this is where the main function of the game is. It draws the board.
+[scrabble.vercel.app](https://scrabble.usmankadai.dev)
 
-* audio.mjs -- this deals with the audio of the game.
+## JavaScript Modules
 
-* gamePlayAndScoring.mjs -- this deals with the game play and scoring.
+- `scrabble.mjs` — draws the board, manages the tile rack, scoring, and game flow
+- `dragAndDrop.mjs` — handles drag and drop for mouse and touch (mobile supported)
+- `gamePlayAndScoring.mjs` — game rules screen content
+- `audio.mjs` — background music and sound effects
 
-* wordsDictionary.mjs -- this deals with the words dictionary to check if the word played is valid or not.
+## Features
 
-* drapAndDrop.mjs -- this deals with the drag and drop of tiles from the rack to the board.
+- Drag and drop tiles from the rack to the board (mouse and touch/mobile)
+- Word validation via the [Free Dictionary API](https://dictionaryapi.dev/) — invalid words are rejected and not scored
+- Correct Scrabble scoring: 2× LS, 3× LS, 2× WS, 3× WS bonus squares applied to newly placed tiles
+- Running total score with per-word breakdown (e.g. `TAB: 5 pts`)
+- Letter scoring guide displayed in the info panel
+- Game can be paused and resumed
+- Tile rack refill after each turn
+- Hints for better play suggestions
+- Background music with mute/unmute toggle
+- Committed tiles are locked — you cannot place a new tile on top of a played one
 
-* svr.js -- this is the server side of the game that will be used to display the game in port 8080
+## Installation & Local Development
 
-## Installation & Use
+```bash
+npm install
+npm start        # runs the Express server
+npm run dev      # runs with nodemon (auto-restart)
+```
 
-1. To start the game you need to start a simple server on port 8080 with: npm start
-2. Best view 100% zoom level on chrome.
+## Deployment
 
-## Requirements achieved
+Deployed as a static site on Vercel. The `client/` folder is the output directory.
 
-1. Achieved drag and drop to any square on the board.
-2. For better user experience i added music which can be muted and unmuted.
-3. The game can be paused and resumed.
-4. Included hint for better suggestion.
-5. By the bottom right of the screen you can see how many tiles remaining for you after each refill of the rack.
-6. A player can refill his or her rack after each play.
+```bash
+npx vercel        # deploy to preview
+npx vercel --prod # deploy to production
+```
 
-## Future improvements
+## Future Improvements
 
-1. Improving multiplayer game using web sockets.
-2. Including each score to each letterTile.
-3. Improving the audio API.
-4. Improving scoring of the game in such a way that if a player plays on special squares the game should be able to calculate double or tripple letter or word scores.
-5. Improve the dictionary to show the meaning of the word played.
+1. Multiplayer support
+2. Show the meaning of validated words
+3. Score subscript on each tile in the rack
 
 ![Game Menu](./client/images/gameMenu.png)
 
-![GamePlay](./client/images/game.png)
+![Gameplay](./client/images/game.png)
