@@ -15,6 +15,7 @@
         <main id="main">
             <header id="gameHeader">
                 <button id="pauseToggle" type="submit" aria-label="Pause"></button>
+                <div id="turnIndicator"></div>
             </header>
             <div id="boardColumn">
                 <div id= board class="transition">
@@ -60,22 +61,42 @@
                 <button id="rules" type="submit">Rules</button>
                 <button id="options" type="submit">Options</button>
             </div>
+
+            <!-- ── Mode selection overlay ── -->
+            <div id="modeOverlay" class="gameOverlay">
+                <div class="overlayCard">
+                    <h2>Choose Mode</h2>
+                    <button id="singlePlayerBtn" class="overlayBtn">Single Player</button>
+                    <button id="multiPlayerBtn"  class="overlayBtn">Multiplayer</button>
+                    <button id="modeBack"        class="overlayBtnSecondary">← Back</button>
+                </div>
+            </div>
+
+            <!-- ── Multiplayer: enter name ── -->
+            <div id="nameOverlay" class="gameOverlay">
+                <div class="overlayCard">
+                    <h2>Multiplayer</h2>
+                    <p>Enter your name to join a game</p>
+                    <input id="playerNameInput" type="text" placeholder="Your name" maxlength="20" autocomplete="off">
+                    <button id="joinBtn"  class="overlayBtn">Join Game</button>
+                    <button id="nameBack" class="overlayBtnSecondary">← Back</button>
+                </div>
+            </div>
+
+            <!-- ── Multiplayer: lobby / waiting room ── -->
+            <div id="lobbyOverlay" class="gameOverlay">
+                <div class="overlayCard">
+                    <h2>Waiting Room</h2>
+                    <div id="lobbyPlayerList"></div>
+                    <p id="lobbyStatus">Waiting for players…</p>
+                    <button id="startGameBtn" class="overlayBtn" style="display:none">▶ Start Game</button>
+                    <p id="hostNote" style="display:none;font-size:0.8rem;opacity:0.7">You are the host</p>
+                </div>
+            </div>
         </main>
 
-        <!-- SOCKET.IO -->
+        <!-- SOCKET.IO (must load before ES modules execute) -->
         <script src="/socket.io/socket.io.js"></script>
-
-        <script>
-            const socket = io();
-
-            socket.on('connect', () => {
-                console.log('Connected to Socket.IO server');
-            });
-
-            socket.on('message', (msg) => {
-                console.log(msg);
-            });
-        </script>
     </body>
 </html>
 

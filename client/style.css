@@ -544,3 +544,124 @@ li{
         font-size: 0.7rem;
     }
 }
+
+/* ── Multiplayer overlays ──────────────────────────────────────────────────── */
+
+.gameOverlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    padding: 1rem;
+}
+.gameOverlay.visible {
+    display: flex;
+}
+
+.overlayCard {
+    background: url(images/css2.webp) center/cover;
+    border-radius: 1.5rem;
+    padding: 2rem 2.5rem;
+    text-align: center;
+    color: white;
+    max-width: 22rem;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.6);
+}
+.overlayCard h2 {
+    font-size: 2rem;
+    margin-bottom: 0.3rem;
+}
+.overlayCard p {
+    font-size: 0.95rem;
+    opacity: 0.85;
+}
+
+.overlayBtn {
+    font-size: 1.3rem;
+    padding: 0.7rem 1rem;
+    color: white;
+    border: none;
+    border-radius: 1rem;
+    background: url(images/css.jpg) center/cover;
+    box-shadow: 0 0.4rem 0.8rem rgba(0, 0, 0, 0.45);
+    cursor: pointer;
+    transition: transform 0.12s;
+}
+.overlayBtn:hover { transform: translateY(-2px); }
+
+.overlayBtnSecondary {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    color: white;
+    border: none;
+    border-radius: 0.8rem;
+    background: rgba(255, 255, 255, 0.15);
+    cursor: pointer;
+    transition: background 0.12s;
+}
+.overlayBtnSecondary:hover { background: rgba(255, 255, 255, 0.28); }
+
+#playerNameInput {
+    font-size: 1.1rem;
+    padding: 0.5rem 0.8rem;
+    border: none;
+    border-radius: 0.7rem;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+    background: rgba(255, 255, 255, 0.9);
+    color: #222;
+}
+
+/* Lobby player list */
+#lobbyPlayerList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    max-height: 10rem;
+    overflow-y: auto;
+}
+.lobbyPlayer {
+    padding: 0.4rem 0.8rem;
+    border-radius: 0.6rem;
+    background: rgba(0, 0, 0, 0.3);
+    font-size: 1rem;
+}
+
+/* Turn indicator in game header */
+#turnIndicator {
+    display: none;
+    font-size: 1rem;
+    font-weight: bold;
+    padding: 0.35rem 0.9rem;
+    border-radius: 0.6rem;
+    color: white;
+    white-space: nowrap;
+}
+#turnIndicator.myTurn      { background: rgba(40, 167, 69, 0.85); }
+#turnIndicator.opponentTurn{ background: rgba(220, 53, 69, 0.75); }
+
+/* Multiplayer per-player scores panel */
+#multiScores {
+    font-size: 1.2rem;
+    padding: 0.8rem 1rem;
+    color: white;
+    text-align: center;
+    border-radius: 1.2rem;
+    background: url(images/css.jpg) center/cover;
+    box-shadow: 0 0.4rem 0.6rem 0 rgb(19, 16, 16);
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+.playerScore {
+    font-size: 1rem;
+    padding: 0.25rem 0;
+}

@@ -5,6 +5,7 @@ It also helps to insert the text content on the board.
 import * as drag from './dragAndDrop.mjs';
 import * as audio from './audio.mjs';
 import * as rules from './gamePlayAndScoring.mjs';
+import * as mp from './multiplayer.mjs';
 
 
 const bagOfLetters = ['A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'B', 'B', 'C', 'C', 'D', 'D', 'D', 'D', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'F', 'F', 'G', 'G', 'G', 'H', 'H', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'J', 'K', 'L', 'L', 'L', 'L', 'M', 'M', 'N', 'N', 'N', 'N', 'N', 'N', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'P', 'P', 'Q', 'R', 'R', 'R', 'R', 'R', 'R', 'S', 'S', 'S', 'S', 'T', 'T', 'T', 'T', 'T', 'T', 'U', 'U', 'U', 'U', 'V', 'V', 'W', 'W', 'X', 'Y', 'Y', 'Z', ' ', ' '];
@@ -52,6 +53,7 @@ function emptyTile(e) {
 }
 
 let totalScore = 0;
+let multiplayerMode = false;
 
 // Bonus square IDs (match the CSS selectors)
 const tripleWordSquares  = new Set(['dropzone1','dropzone8','dropzone15','dropzone106','dropzone120','dropzone211','dropzone218','dropzone225']);
@@ -83,7 +85,7 @@ function buildWordCells(positions, isHorizontal) {
       const char = getLetterAt(x, y);
       if (!char) return null;
       const dz = document.querySelector(`.dropzone[data-x="${x}"][data-y="${y}"]`);
-      cells.push({ char, dropzoneId: dz.id, isNew: newSet.has(`${x},${y}`) });
+      cells.push({ char, dropzoneId: dz.id, isNew: newSet.has(`${x},${y}`), x, y });
     }
   } else {
     const x = positions[0].x;
@@ -95,15 +97,15 @@ function buildWordCells(positions, isHorizontal) {
       const char = getLetterAt(x, y);
       if (!char) return null;
       const dz = document.querySelector(`.dropzone[data-x="${x}"][data-y="${y}"]`);
-      cells.push({ char, dropzoneId: dz.id, isNew: newSet.has(`${x},${y}`) });
+      cells.push({ char, dropzoneId: dz.id, isNew: newSet.has(`${x},${y}`), x, y });
     }
   }
 
   return cells;
 }
 
-// Scores the word applying letter and word bonuses only to newly placed tiles
-function score(cells) {
+// Returns the numeric score for a set of cells (applies bonuses).
+function calculateScore(cells) {
   let wordMultiplier = 1;
   let wordScore = 0;
 
@@ -118,7 +120,12 @@ function score(cells) {
     wordScore += letterScore;
   }
 
-  wordScore *= wordMultiplier;
+  return wordScore * wordMultiplier;
+}
+
+// Scores the word applying letter and word bonuses only to newly placed tiles
+function score(cells) {
+  const wordScore = calculateScore(cells);
   totalScore += wordScore;
 
   for (const tile of document.querySelectorAll('.letterOnBoard')) {
@@ -180,7 +187,19 @@ async function checkWord() {
 
     if (response.ok) {
       result.textContent = `${word} is a valid word. Well done 👏`;
-      score(cells);
+      if (multiplayerMode) {
+        const wordScore = calculateScore(cells);
+        const serverCells = cells.map(c => ({ x: c.x, y: c.y, letter: c.char, isNew: c.isNew }));
+        // Optimistically commit tiles visually
+        for (const tile of document.querySelectorAll('.letterOnBoard')) {
+          tile.classList.remove('letterOnBoard');
+          tile.classList.add('committedLetter');
+        }
+        mp.playWord(serverCells, word, wordScore);
+        lockBoard();
+      } else {
+        score(cells);
+      }
     } else {
       result.textContent = `${word} is not a valid word 🚫. Keep trying`;
     }
@@ -408,6 +427,185 @@ function setScreen(name) {
   try { localStorage.setItem(SCREEN_KEY, name); } catch (e) { /* ignore */ }
 }
 
+// ── Multiplayer helpers ───────────────────────────────────────────────────────
+
+/** Replace the rack with a server-supplied array of letters. */
+function setRack(rack) {
+  const lBox = document.querySelector('#letterboard');
+  for (const box of [...lBox.querySelectorAll('.letterbox')]) box.remove();
+  for (const letter of rack) {
+    const box = document.createElement('div');
+    box.className = 'letterbox';
+    lBox.append(box);
+    const tile = document.createElement('div');
+    tile.className = 'letters';
+    letterTile++;
+    tile.id = `letter${letterTile}`;
+    tile.draggable = true;
+    tile.textContent = letter;
+    box.append(tile);
+  }
+  drag.initialiseDragging();
+  drag.initialiseDropZone();
+}
+
+/** Sync the committed board from the authoritative server state. */
+function applyServerBoard(board) {
+  for (const tile of document.querySelectorAll('#board .committedLetter')) tile.remove();
+  for (const [key, letter] of Object.entries(board)) {
+    const [x, y] = key.split(',');
+    const dz = document.querySelector(`#board .dropzone[data-x="${x}"][data-y="${y}"]`);
+    if (!dz || dz.querySelector('.committedLetter')) continue;
+    const tile = document.createElement('div');
+    tile.className = 'letters committedLetter';
+    tile.id = `board_${x}_${y}`;
+    tile.draggable = false;
+    tile.textContent = letter;
+    dz.appendChild(tile);
+  }
+}
+
+/** Disable interaction – it is not this client's turn. */
+function lockBoard() {
+  document.querySelector('#playWord').disabled = true;
+  for (const tile of document.querySelectorAll('#letterboard .letters')) {
+    tile.draggable = false;
+  }
+}
+
+/** Re-enable interaction – it is this client's turn. */
+function unlockBoard() {
+  document.querySelector('#playWord').disabled = false;
+  for (const tile of document.querySelectorAll('#letterboard .letters')) {
+    tile.draggable = true;
+  }
+}
+
+/** Show whose turn it is and lock/unlock accordingly. */
+function updateTurnIndicator(currentPlayerName) {
+  const indicator = document.querySelector('#turnIndicator');
+  if (!indicator) return;
+  if (currentPlayerName === mp.myPlayerName) {
+    indicator.textContent = '🎯 Your turn!';
+    indicator.className = 'myTurn';
+    unlockBoard();
+  } else {
+    indicator.textContent = `⏳ ${currentPlayerName}'s turn`;
+    indicator.className = 'opponentTurn';
+    lockBoard();
+  }
+}
+
+/** Render per-player scores in the sidebar. */
+function updateMultiScores(players) {
+  let panel = document.querySelector('#multiScores');
+  if (!panel) {
+    panel = document.createElement('div');
+    panel.id = 'multiScores';
+    document.querySelector('#table').appendChild(panel);
+  }
+  panel.innerHTML = '<strong>Scores</strong>';
+  for (const p of players) {
+    const div = document.createElement('div');
+    div.className = 'playerScore';
+    div.textContent = `${p.name}: ${p.score} pts`;
+    panel.appendChild(div);
+  }
+}
+
+/** Append a move to the words-played history list. */
+function recordMove(playerName, word, wordScore) {
+  const entry = document.createElement('div');
+  entry.className = 'wordsPlayed';
+  entry.textContent = `${playerName}: ${word} (${wordScore} pts)`;
+  document.querySelector('#word')?.appendChild(entry);
+}
+
+// ── Multiplayer socket callbacks ──────────────────────────────────────────────
+
+function handleLobbyUpdate({ players }) {
+  const list = document.querySelector('#lobbyPlayerList');
+  list.innerHTML = '';
+  for (let i = 0; i < players.length; i++) {
+    const div = document.createElement('div');
+    div.className = 'lobbyPlayer';
+    div.textContent = players[i].name + (i === 0 ? ' 👑 host' : '');
+    list.appendChild(div);
+  }
+  const statusEl = document.querySelector('#lobbyStatus');
+  if (mp.isHost) {
+    document.querySelector('#startGameBtn').style.display = 'block';
+    document.querySelector('#hostNote').style.display = 'block';
+    statusEl.textContent = players.length >= 2
+      ? `${players.length} players ready – you can start!`
+      : 'Waiting for at least one more player…';
+  } else {
+    statusEl.textContent = 'Waiting for the host to start…';
+  }
+}
+
+let _pendingJoinName = null;
+
+function onSocketReady() {
+  // If the user already clicked Join while the socket was still connecting
+  if (_pendingJoinName) {
+    const name = _pendingJoinName;
+    _pendingJoinName = null;
+    const btn = document.querySelector('#joinBtn');
+    btn.textContent = 'Joining…';
+    _joinTimeout = setTimeout(() => {
+      btn.textContent = 'Join Game';
+      btn.disabled = false;
+      alert('No response from server.');
+    }, 5000);
+    mp.joinGame(name);
+  }
+}
+
+function handleJoinedGame() {
+  clearTimeout(_joinTimeout);
+  const btn = document.querySelector('#joinBtn');
+  btn.textContent = 'Join Game';
+  btn.disabled = false;
+
+  document.querySelector('#nameOverlay').classList.remove('visible');
+  document.querySelector('#lobbyOverlay').classList.add('visible');
+  if (mp.isHost) {
+    document.querySelector('#startGameBtn').style.display = 'block';
+    document.querySelector('#hostNote').style.display = 'block';
+  }
+}
+
+function handleMultiGameStarted({ players, currentPlayerName }) {
+  document.querySelector('#lobbyOverlay').classList.remove('visible');
+  multiplayerMode = true;
+  // Hide single-player total score, show multiplayer scores panel
+  document.querySelector('#scores').style.display = 'none';
+  document.querySelector('#refillTile').style.display = 'none';
+  updateMultiScores(players);
+  updateTurnIndicator(currentPlayerName);
+  document.querySelector('#turnIndicator').style.display = 'flex';
+  showGame();
+  setScreen('game');
+}
+
+function handleWordResult({ playerName, word, wordScore, players, board, currentPlayerName }) {
+  applyServerBoard(board);
+  updateMultiScores(players);
+  recordMove(playerName, word, wordScore);
+  document.querySelector('#result').textContent =
+    `${playerName} played "${word}" for ${wordScore} pts`;
+  updateTurnIndicator(currentPlayerName);
+}
+
+function handlePlayerDisconnected({ name, players, currentPlayerName }) {
+  document.querySelector('#result').textContent = `${name} disconnected.`;
+  updateMultiScores(players);
+  if (currentPlayerName) updateTurnIndicator(currentPlayerName);
+}
+
+// ── Mode-selection flow ───────────────────────────────────────────────────────
+
 function showGame() {
   document.querySelector('#menu').style.display = 'none';
   document.querySelector('#gameRule').classList.remove('displayOption');
@@ -420,8 +618,48 @@ function showGame() {
   document.querySelector('#pauseToggle').classList.remove('paused');
 }
 function play() {
+  document.querySelector('#modeOverlay').classList.add('visible');
+}
+function startSinglePlayer() {
+  document.querySelector('#modeOverlay').classList.remove('visible');
+  multiplayerMode = false;
   showGame();
   setScreen('game');
+}
+function openMultiplayerEntry() {
+  document.querySelector('#modeOverlay').classList.remove('visible');
+  document.querySelector('#nameOverlay').classList.add('visible');
+  document.querySelector('#playerNameInput').focus();
+}
+let _joinTimeout = null;
+
+function joinMultiplayer() {
+  const name = document.querySelector('#playerNameInput').value.trim();
+  if (!name) {
+    document.querySelector('#playerNameInput').focus();
+    return;
+  }
+
+  const btn = document.querySelector('#joinBtn');
+
+  if (!mp.isConnected()) {
+    btn.textContent = 'Connecting…';
+    btn.disabled = true;
+    // Retry once socket connects (onSocketReady re-enables the button)
+    _pendingJoinName = name;
+    return;
+  }
+
+  btn.textContent = 'Joining…';
+  btn.disabled = true;
+
+  _joinTimeout = setTimeout(() => {
+    btn.textContent = 'Join Game';
+    btn.disabled = false;
+    alert('No response from server. Make sure the server is running with: node svr.js');
+  }, 5000);
+
+  mp.joinGame(name);
 }
 function instruction() {
   document.querySelector('#menu').style.display = 'none';
@@ -480,6 +718,27 @@ function display() {
   document.querySelector('#refillTile').addEventListener('click', refillNewLetter);
   window.addEventListener('drop', emptyTile);
   window.addEventListener('drop', checkDrop);
+
+  // Mode-selection overlay buttons
+  document.querySelector('#singlePlayerBtn').addEventListener('click', startSinglePlayer);
+  document.querySelector('#multiPlayerBtn').addEventListener('click', openMultiplayerEntry);
+  document.querySelector('#modeBack').addEventListener('click', () => {
+    document.querySelector('#modeOverlay').classList.remove('visible');
+  });
+
+  // Name-entry overlay
+  document.querySelector('#joinBtn').addEventListener('click', joinMultiplayer);
+  document.querySelector('#playerNameInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') joinMultiplayer();
+  });
+  document.querySelector('#nameBack').addEventListener('click', () => {
+    document.querySelector('#nameOverlay').classList.remove('visible');
+    document.querySelector('#modeOverlay').classList.add('visible');
+  });
+
+  // Lobby overlay
+  document.querySelector('#startGameBtn').addEventListener('click', () => mp.startGame());
+
   drawBoard();
   twoLSWordBox();
   twoWordBox();
@@ -493,6 +752,19 @@ function display() {
   audio.plays();
   rules.game();
   rules.rules();
+
+  // Initialise multiplayer socket listeners
+  mp.init({
+    onError:              (msg) => alert(msg),
+    onSocketReady:        onSocketReady,
+    onLobbyUpdate:        handleLobbyUpdate,
+    onJoinedGame:         handleJoinedGame,
+    onGameStarted:        handleMultiGameStarted,
+    onYourRack:           (rack) => setRack(rack),
+    onWordResult:         handleWordResult,
+    onPlayerDisconnected: handlePlayerDisconnected,
+  });
+
   restoreScreen();
 }
 
