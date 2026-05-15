@@ -68,6 +68,8 @@ function touchEndHandler(e) {
   if (dropzone && !dropzone.querySelector('.committedLetter')) {
     if (dropzone.classList.contains('letterbox')) {
       touchDragging.classList.remove('letterOnBoard');
+    } else {
+      touchDragging.classList.add('letterOnBoard');
     }
     dropzone.append(touchDragging);
   }
