@@ -173,7 +173,9 @@ io.on('connection', (sock) => {
 });
 
 // ── Start server ─────────────────────────────────────────────────────────────
-const PORT = 0;
+// In production (Render sets PORT) bind to the assigned port; locally pick a
+// random free port and open the browser for convenience.
+const PORT = process.env.PORT || 0;
 
 server.listen(PORT, '0.0.0.0', async () => {
   const assignedPort = server.address().port;
@@ -184,9 +186,11 @@ server.listen(PORT, '0.0.0.0', async () => {
   console.log(`Access your app at: ${url}`);
   console.log('------------------------------------');
 
-  try {
-    await open(url);
-  } catch (err) {
-    console.log('Could not open browser automatically:', err.message);
+  if (!process.env.PORT) {
+    try {
+      await open(url);
+    } catch (err) {
+      console.log('Could not open browser automatically:', err.message);
+    }
   }
 });
