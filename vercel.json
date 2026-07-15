@@ -5,6 +5,11 @@
   "framework": null,
   "redirects": [
     {
+      "source": "/",
+      "destination": "https://scrabble-ntna.onrender.com/",
+      "permanent": false
+    },
+    {
       "source": "/:path*",
       "destination": "https://scrabble-ntna.onrender.com/:path*",
       "permanent": false
